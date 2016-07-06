@@ -70,19 +70,6 @@
 	<build>
       <finalName>echarts</finalName>
 		 <plugins>
-		    <!-- <plugin>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-maven-plugin</artifactId>
-				<version>${jetty.version}</version>
-				<configuration>
-					是否关闭jetty自动reload
-					<scanIntervalSeconds>0</scanIntervalSeconds>
-					<webAppConfig>
-						<defaultsDescriptor>src/test/resources/webdefault.xml</defaultsDescriptor>
-						<contextPath>/</contextPath>
-					</webAppConfig>
-				</configuration>
-			</plugin> -->
 		  <!-- spring-boot -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
