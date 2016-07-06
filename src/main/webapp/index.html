@@ -228,8 +228,8 @@
 	
 	$(document).ready(function(){
 		/*菜单高亮处理*/
-		$("ul.menu li").click(function(){
-			$("ul.menus").find(".active").removeClass("active");
+		$("ul.menus li").click(function(){
+			$("ul.menu").find(".active").removeClass("active");
 			$(this).addClass("active");
 		});
 		/*子菜单*/
