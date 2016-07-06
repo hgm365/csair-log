@@ -1,0 +1,195 @@
+      <header class="panel-heading">
+           	日志查询
+           <i class="fa fa-info-sign text-muted" data-toggle="tooltip" data-placement="bottom" data-title="ajax to load the data." data-original-title="" title=""></i> 
+      </header>
+      <section class="scrollable">
+       <section class="panel panel-default">
+         <div class="row wrapper">
+         <form id="searchForm" method="post" class="form-horizontal">
+           <div class="form-group">
+              <label class="col-sm-1 control-label"> 起始时间:</label>
+              <div class="col-sm-2">
+                  <input type="text" class="form-control" id="startDT" name="startTime" data-bv-trigger="change"/>
+              </div>
+              
+              <label class="col-sm-1 control-label"> 结束时间:</label>
+              <div class="col-sm-2">
+                  <input type="text" class="form-control" id="endDT" name="endTime"  data-bv-trigger="change"/>
+              </div>
+              
+               <label class="control-label"></label>
+                <div class="col-sm-2">
+               	<button type="submit" class="btn btn-success" id="searchBtn">查询</button>
+               </div>
+           </div>
+         
+           <div class="col-sm-12 m-b-xs search-dyData" name="cookies">
+           	  	<select class="form-control input-s-xs inline v-middle pRelation"> 
+	                <option value="must">与</option>
+	                <option value="should">或</option>
+	                <option value="must_not">非</option>
+	            </select>
+	             <select class="form-control input-s-sm inline v-middle pName">
+	                <option value="cookies">cookie</option>
+	                <option value="deviceIds">设备id</option>
+	                <option value="uris">接口uri</option>
+	                <option value="remoteAddrs">客户端ip</option>
+	            </select><input type="text" class="form-control input-s-sm  v-middle inline pValue" placeholder="searching">
+              <button type="button" class="btn btn-sm btn-default plusBtn">+</button>
+              <button type="button" class="btn btn-sm btn-default minusBtn">-</button>
+            </div>
+            </form>
+            <div class="col-sm-12">
+               <div id="main" style="height: 500px" class="col-sm-12"></div>
+           </div>
+         </div>
+         <div class="table-responsive">
+           <div id="dataTable_wrapper" class="dataTables_wrapper">
+              <table class="table table-striped m-b-none dataTable" data-ride="datatables" id="dataTable" role="grid">
+	             <thead>
+	               <tr role="row">
+	                <th>序号</th>
+	                <th >startTime开始时间</th>
+	                <th >endTime</th>
+	                <th >cookie</th>
+	                <th >deviceId</th>
+	                <th >uri</th>
+	                <th >remoteAddr</th>
+	                </tr>
+	             </thead>
+             </table>
+             </div>
+         </div>
+       </section>
+     </section>
+
+<script type="text/javascript">
+/*时间初始化*/
+var date= new Date();
+$("#endDT").val(date.Format("yyyy-MM-dd HH:mm:ss"));
+var startDT=date.DateAdd('d',-1);
+$("#startDT").val(startDT.Format("yyyy-MM-dd HH:mm:ss"));
+</script>
+<script type="text/javascript" src="js/datatable-data.js"></script>
+<script type="text/javascript" src="js/echarts-data.js"></script>
+<script type="text/javascript">
+var oTable;//dataTables 表格
+var myChart ;//echarts 图表
+
+$(document).ready(function(){
+
+/*可选参数事件*/
+$(".pName").change(function(){
+	/* $(this).next(".pValue").attr("name",initName($(this).val(),"value"));
+	$(this).prev(".pRelation").attr("name",initName($(this).val(),"relationship")); */
+	$(this).parent("div.search-dyData").attr("name",$(this).val());
+});
+
+$(".plusBtn").click(function(){
+	var newDataRow=$(this).parent("div").clone(true);
+	$(this).parent("div").after(newDataRow);
+	newDataRow.find(".pName").change();
+});
+
+$(".minusBtn").click(function(){
+	if($(".search-dyData").length>1){
+		$(this).parent("div").remove();
+	}
+});
+
+/*
+ * bootstrap-dateTimePicker 时间组件
+ */
+var logic = function(obj,isEnd){
+	var startDT=$('#startDT').val();
+	var endDT=$('#endDT').val();
+	if(startDT && endDT && startDT>endDT){
+		if(isEnd){
+			$(obj).val(startDT);
+		}else{
+			$(obj).val(endDT);
+		}
+		return "";
+	}
+};
+
+$('#startDT').datetimepicker({
+	  language: 'zh-CN',
+	  format: "yyyy-mm-dd hh:ii:ss",
+      showMeridian: true,
+      autoclose: true,
+      todayBtn: true,
+      endDate:$('#endDT').val(),
+}).on("click",function(ev){
+    $("#startDT").datetimepicker("setEndDate", $("#endDT").val());
+}).on("change",function(ev){
+	logic(this,false);
+});
+
+$('#endDT').datetimepicker({
+	language: 'zh-CN',
+	format: "yyyy-mm-dd hh:ii:ss",
+    showMeridian: true,
+    autoclose: true,
+    todayBtn: true,
+    startDate:$('#startDT').val()
+}).on("click",function(ev){
+    $("#endDT").datetimepicker("setStartDate", $("#startDT").val());
+}).on("change",function(ev){
+	logic(this,true);
+});
+
+
+/*表单验证*/
+$('#searchForm')
+     .bootstrapValidator({
+         message: 'This value is not valid',
+         feedbackIcons: {
+             valid: 'glyphicon glyphicon-ok',
+             invalid: 'glyphicon glyphicon-remove',
+             validating: 'glyphicon glyphicon-refresh'
+         },
+         fields: {
+        	 startTime: {
+                 message: 'The username is not valid',
+                 validators: {
+                     notEmpty: {
+                         message: '*必填项'
+                     },
+                     date: {
+                    	 message: '请输入正确格式的日期',
+                         format: 'YYYY-MM-DD h:m:s'
+                     }
+                 }
+             },
+             endTime: {
+                 validators: {
+                     notEmpty: {
+                         message: '*必填项'
+                     },
+                     date: {
+                    	 message: '请输入正确格式的日期',
+                         format: 'YYYY-MM-DD h:m:s'
+                     }
+                 }
+             },
+         }
+     })
+     .on('success.form.bv', function(e) {
+         // Prevent form submission
+         e.preventDefault();
+
+         // Get the form instance
+         var $form = $(e.target);
+
+         // Get the BootstrapValidator instance
+         var bv = $form.data('bootstrapValidator');
+         
+         $("#searchBtn").removeAttr("disabled");//多次查询
+
+        if(oTable){
+        	oTable.draw();
+        }
+});
+});
+</script>
